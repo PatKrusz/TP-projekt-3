@@ -2,5 +2,7 @@
 Projekt 3 z technik programowania 
 
 Opracowany przez:
+
 Patryk Kruszyński 
+
 Damian Łaskowski
