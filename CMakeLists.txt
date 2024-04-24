@@ -9,6 +9,5 @@ find_package(Matplot++ REQUIRED)
 
 pybind11_add_module(projekt main.cpp)
 target_link_libraries(projekt PUBLIC Matplot++::matplot)
-#set_property(TARGET matplot PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 install(TARGETS projekt LIBRARY DESTINATION .)
