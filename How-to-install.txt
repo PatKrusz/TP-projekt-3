@@ -1,0 +1,17 @@
+Uruchom komendy w kolejności:
+
+Git:
+	git clone https://github.com/PatKrusz/TP-projekt-3.git
+	cd TP-projekt-3     (może być potrzeba przejścia przez dłuższą ścieżkę dostępu zależnie od komputera)
+	git submodule update --init     (moduły nie są potrzebne przy pełnej instalacji pybinda i matplotplota)
+
+Miniconda:
+	cd TP-projekt-3     (może być potrzeba przejścia przez dłuższą ścieżkę dostępu zależnie od komputera)
+	pip install .
+
+Po instalacji / do testowania
+	python
+	import projekt
+
+składnia wywołania komend:
+	projekt.<nazwa_funkcji>(<wartości_oddzielone_przecinkami_o_ile_wymagane>)
