@@ -7,15 +7,32 @@
 #include <string>
 #include <complex>
 
-// zdefiniowanie liczby PI
-#define PI 3.14159265
+//domyślny namespace
+using namespace std;
 
 //aliasy namespace'ów do użytku
 namespace py = pybind11;
 namespace mp = matplot;
 
-//domyślny namespace
-using namespace std;
+// zdefiniowanie liczby PI
+#define PI 3.14159265
+
+//DEKLARACJE FUNKCJI
+
+vector<double> gen_sig(int, double, double, double, double, int, double);
+void rys(vector<double>, vector<double>, string);
+void test_gen_sig(int, double, double, double, double, int, double);
+void low_f_filter(vector<double>&, const vector<double>&, double);
+vector<complex<double>> dft_vector(vector<double>);
+vector<double> amplitude(vector<complex<double>>);
+vector<double> frequency(vector<complex<double>>);
+vector<double> rdft_vector(vector<complex<double>>);
+void dft_test1(double, double, double);
+void dft_test3(double, double, double, int, double);
+void dft_test4(double, double, double, int);
+
+
+
 
 vector<double> gen_sig(int rodzaj_funkcji, double amplituda, double czestotliwosc, double przesuniecie_faz, double ruch_y, int liczba_probek, double dlugosc)
 {
@@ -238,7 +255,7 @@ vector<complex<double>> dft_vector(vector<double> zlozenie)
         for (int n = 0; n < probki; ++n)
         {
             double kat = 2 * PI * m * n / probki;
-            suma += complex<double>(zlozenie[n] * cos(kat), -zlozenie[n] * sin(kat));
+            suma += zlozenie[n] * polar(1.0, -kat);
         }
         spektrum[m] = suma;
     }
@@ -272,22 +289,34 @@ vector<double> frequency(vector<complex<double>> spektrum)
     return czestotliwosc;
 }
 
+vector<double> rdft_vector(vector<complex<double>> spektrum)
+{
+    int dlugosc = spektrum.size();
+
+    vector<double> zlozenie2(dlugosc);
+
+    for (int m = 0; m < dlugosc; ++m)
+    {
+        complex<double> suma = 0.0;
+        for (int n = 0; n < dlugosc; ++n)
+        {
+            double kat = 2 * PI * m * n / dlugosc;
+            suma += spektrum[n] * polar(1.0, kat);
+        }
+        zlozenie2[m] = suma.real() / dlugosc;
+    }
+
+    return zlozenie2;
+}
+
 void dft_test1(double czest1, double czest2, double czest3)
 {
     int liczba_probek = 1000;
 
-    vector<double> x = mp::linspace(0, 4 * PI, liczba_probek);
+    vector<double> x = mp::linspace(0, 2 * PI, liczba_probek);
 
-    vector<double> f1 = mp::transform(x, [&](auto x) { return sin(czest1 * x); });
-    vector<double> f2 = mp::transform(x, [&](auto x) { return sin(czest2 * x); });
-    vector<double> f3 = mp::transform(x, [&](auto x) { return sin(czest3 * x); });
+    vector<double> zlozenie = mp::transform(x, [&](auto x) { return (sin(czest1 * x) + sin(czest2 * x) + sin(czest3 * x)); });
 
-    vector<double> zlozenie(liczba_probek);
-
-    for (int i = 0; i < liczba_probek; ++i)
-    {
-        zlozenie[i] = f1[i] + f2[i] + f3[i];
-    }
 
     rys(x, zlozenie, "zlozenie funkcji");
 }
@@ -295,19 +324,10 @@ void dft_test1(double czest1, double czest2, double czest3)
 void dft_test3(double czest1, double czest2, double czest3, int a, double filtr)
 {
     int liczba_probek = 2 * a;
-    int czest_probk = 2 * a;
+
     vector<double> x = mp::linspace(0, 2 * PI, liczba_probek);
 
-    vector<double> f1 = mp::transform(x, [&](auto x) { return sin(czest1 * x); });
-    vector<double> f2 = mp::transform(x, [&](auto x) { return sin(czest2 * x); });
-    vector<double> f3 = mp::transform(x, [&](auto x) { return sin(czest3 * x); });
-
-    vector<double> zlozenie(liczba_probek);
-
-    for (int i = 0; i < liczba_probek; ++i)
-    {
-        zlozenie[i] = f1[i] + f2[i] + f3[i];
-    }
+    vector<double> zlozenie = mp::transform(x, [&](auto t) { return sin(czest1 * t) + sin(czest2 * t) + sin(czest3 * t); });
 
     vector<complex<double>> spektrum(liczba_probek);
 
@@ -315,10 +335,10 @@ void dft_test3(double czest1, double czest2, double czest3, int a, double filtr)
     {
         complex<double> suma = 0.0;
 
-        for (int n = 0; n < liczba_probek; ++n)
+        for (size_t n = 0; n < liczba_probek; ++n)
         {
             double kat = 2 * PI * m * n / liczba_probek;
-            suma += complex<double>(zlozenie[n] * cos(kat), -zlozenie[n] * sin(kat));
+            suma += zlozenie[n] * polar(1.0, -kat);
         }
         spektrum[m] = suma;
     }
@@ -344,19 +364,10 @@ void dft_test3(double czest1, double czest2, double czest3, int a, double filtr)
 void dft_test4(double czest1, double czest2, double czest3, int a)
 {
     int liczba_probek = 2 * a;
-    int czest_probk = 2 * a;
+
     vector<double> x = mp::linspace(0, 2 * PI, liczba_probek);
 
-    vector<double> f1 = mp::transform(x, [&](auto x) { return sin(czest1 * x); });
-    vector<double> f2 = mp::transform(x, [&](auto x) { return sin(czest2 * x); });
-    vector<double> f3 = mp::transform(x, [&](auto x) { return sin(czest3 * x); });
-
-    vector<double> zlozenie(liczba_probek);
-
-    for (int i = 0; i < liczba_probek; ++i)
-    {
-        zlozenie[i] = f1[i] + f2[i] + f3[i];
-    }
+    vector<double> zlozenie = mp::transform(x, [&](auto t) { return sin(czest1 * t) + sin(czest2 * t) + sin(czest3 * t); });
 
     vector<complex<double>> spektrum(liczba_probek);
 
@@ -367,7 +378,7 @@ void dft_test4(double czest1, double czest2, double czest3, int a)
         for (int n = 0; n < liczba_probek; ++n)
         {
             double kat = 2 * PI * m * n / liczba_probek;
-            suma += complex<double>(zlozenie[n] * cos(kat), -zlozenie[n] * sin(kat));
+            suma += zlozenie[n] * polar(1.0, -kat);
         }
         spektrum[m] = suma;
     }
@@ -386,28 +397,32 @@ void dft_test4(double czest1, double czest2, double czest3, int a)
 
     vector<double> zlozenie2(liczba_probek);
 
-    for (int n = 0; n < liczba_probek; ++n)
+    for (int m = 0; m < liczba_probek; ++m)
     {
         complex<double> suma = 0.0;
-        for (int k = 0; k < liczba_probek; ++k) 
+        for (int n = 0; n < liczba_probek; ++n) 
         {
-            double kat = 2 * PI * n * k / liczba_probek;
-            suma += spektrum[k] * polar(1.0, kat);
+            double kat = 2 * PI * m * n / liczba_probek;
+            suma += spektrum[n] * polar(1.0, kat);
         }
-        zlozenie2[n] = suma.real() / liczba_probek;
+        zlozenie2[m] = suma.real() / liczba_probek;
     }
 
     rys(x, zlozenie2, "dft");
 
 }
-
+/////////////////////////////////////////////////////TESTY
 PYBIND11_MODULE(projekt, m) {
 
 	m.def("signal", &gen_sig);
 	m.def("show", &rys);
     m.def("test_sig", &test_gen_sig);
+    m.def("filter", &low_f_filter);
+    m.def("dft", &dft_vector);
+    m.def("amplitude", &amplitude);
+    m.def("frequency", &frequency);
+    m.def("rdft", &rdft_vector);
     m.def("splot_test", &dft_test1);
     m.def("dft_test", &dft_test3);
-    m.def("filtr", &low_f_filter);
     m.def("rdft_test", &dft_test4);
 }
