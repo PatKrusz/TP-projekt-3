@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <complex>
+#include <AudioFile.h>
 
 //domyślny namespace
 using namespace std;
