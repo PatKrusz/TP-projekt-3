@@ -28,9 +28,10 @@ vector<complex<double>> dft_vector(vector<double>);
 vector<double> amplitude(vector<complex<double>>, int);
 vector<double> frequency(vector<complex<double>>, int);
 vector<double> rdft_vector(vector<complex<double>>);
-void dft_test1(double, double, double, int);
-void dft_test3(double, double, double, int, double);
-void dft_test5(double, double, double, int, int);
+vector<double> generator(double, double, double, double, double, double, double, double, double, int);
+void dft_test1(double, double, double, double, double, double, double, double, double, int);
+void dft_test3(int, double, double, double, double, double, double, double, double, double, double);
+void dft_test5(int, int, double, double, double, double, double, double, double, double, double);
 
 
 
@@ -38,7 +39,7 @@ void dft_test5(double, double, double, int, int);
 vector<double> gen_sig(int rodzaj_funkcji, double amplituda, double czestotliwosc, double przesuniecie_faz, double ruch_y, int liczba_probek, double dlugosc)
 {
     vector<double> x = mp::linspace(0, dlugosc * PI, liczba_probek);
-    vector<double> y;
+    vector<double> y(liczba_probek);
 
     switch (rodzaj_funkcji)
     {
@@ -84,7 +85,7 @@ vector<double> gen_sig(int rodzaj_funkcji, double amplituda, double czestotliwos
             for (int i = 0; i < liczba_probek; ++i)
             {
 
-                if (y[i - 1] < -amplituda && check == true)
+                if (y[i - 1] < -amplituda && check == true && i>0)
                 {
                     petla = i;
                     przesuniecie_faz = 0;
@@ -143,9 +144,38 @@ void test_gen_sig(int rodzaj_funkcji, double amplituda, double czestotliwosc, do
     vector<double> x = mp::linspace(0, dlugosc * PI, liczba_probek);
     vector<double> y;
 
+    string name;
+
     y = gen_sig(rodzaj_funkcji, amplituda, czestotliwosc, przesuniecie_faz, ruch_y, liczba_probek, dlugosc);
 
-    rys(x, y, to_string(rodzaj_funkcji));
+    switch (rodzaj_funkcji)
+    {
+        case 1: 
+        {
+            name = "sin";
+            break;
+        }
+
+        case 2: 
+        {
+            name = "cos";
+            break;
+        }
+
+        case 3: 
+        {
+            name = "square";
+            break;
+        }
+
+        case 4: 
+        {
+            name = "saw";
+            break;
+        }
+    }
+
+    rys(x, y, name);
 }
 
 void low_f_filter_real(vector<double>& amplituda, const vector<double>& czestotliwosc, double filter)
@@ -225,7 +255,7 @@ vector<double> frequency(vector<complex<double>> spektrum, int podzialka)
     return czestotliwosc;
 }
 
-vector<double> rdft_vector(vector<complex<double>> spektrum)
+vector<double> rdft_vector(const vector<complex<double>> spektrum)
 {
     int dlugosc = spektrum.size();
 
@@ -245,25 +275,54 @@ vector<double> rdft_vector(vector<complex<double>> spektrum)
     return zlozenie2;
 }
 
-void dft_test1(double czest1, double czest2, double czest3, int liczba_probek)
+void dft_test1(double amplituda1, double czestotliwosc1, double przesuniecie_faz1, double amplituda2, double czestotliwosc2, double przesuniecie_faz2, double amplituda3, double czestotliwosc3,
+    double przesuniecie_faz3, int liczba_probek)
 {
 
     vector<double> x = mp::linspace(0, 2 * PI, liczba_probek);
 
-    vector<double> zlozenie = mp::transform(x, [&](auto x) { return (sin(czest1 * x) + sin(czest2 * x) + sin(czest3 * x)); });
+    vector<double> y1 = mp::transform(x, [&](auto x) { return (amplituda1 * sin(czestotliwosc1 * x - przesuniecie_faz1 * PI)); });
+    vector<double> y2 = mp::transform(x, [&](auto x) { return (amplituda2 * sin(czestotliwosc2 * x - przesuniecie_faz2 * PI)); });
+    vector<double> y3 = mp::transform(x, [&](auto x) { return (amplituda3 * sin(czestotliwosc3 * x - przesuniecie_faz3 * PI)); });
 
+    vector<double> y0(liczba_probek);
 
-    rys(x, zlozenie, "zlozenie funkcji");
+    for (int i = 0; i < liczba_probek; ++i)
+    {
+        y0[i] = y1[i] + y2[i] + y3[i];
+    }
+
+    rys(x, y0, "zlozenie funkcji");
 }
 
-void dft_test3(double czest1, double czest2, double czest3, int a, double filtr)
+vector<double> generator(double amplituda1, double czestotliwosc1, double przesuniecie_faz1, double amplituda2, double czestotliwosc2, double przesuniecie_faz2, double amplituda3, double czestotliwosc3,
+    double przesuniecie_faz3, int liczba_probek)
+{
+    vector<double> x = mp::linspace(0, 2 * PI, liczba_probek);
+
+    vector<double> y1 = mp::transform(x, [&](auto x) { return (amplituda1 * sin(czestotliwosc1 * x - przesuniecie_faz1 * PI)); });
+    vector<double> y2 = mp::transform(x, [&](auto x) { return (amplituda2 * sin(czestotliwosc2 * x - przesuniecie_faz2 * PI)); });
+    vector<double> y3 = mp::transform(x, [&](auto x) { return (amplituda3 * sin(czestotliwosc3 * x - przesuniecie_faz3 * PI)); });
+
+    vector<double> y0(liczba_probek);
+
+    for (int i = 0; i < liczba_probek; ++i)
+    {
+        y0[i] = y1[i] + y2[i] + y3[i];
+    }
+
+    return y0;
+}
+
+void dft_test3(int a, double filtr, double amplituda1, double czestotliwosc1, double przesuniecie_faz1, double amplituda2, double czestotliwosc2, double przesuniecie_faz2, double amplituda3, double czestotliwosc3,
+    double przesuniecie_faz3)
 {
     int liczba_probek = 10 * a;
     int zakres = a;
 
     vector<double> x = mp::linspace(0, 2 * PI, liczba_probek);
 
-    vector<double> zlozenie = mp::transform(x, [&](auto t) { return sin(czest1 * t) + sin(czest2 * t) + sin(czest3 * t); });
+    vector<double> zlozenie = generator(amplituda1, czestotliwosc1, przesuniecie_faz1, amplituda2, czestotliwosc2, przesuniecie_faz2, amplituda3, czestotliwosc3, przesuniecie_faz3, liczba_probek);
 
     vector<complex<double>> spektrum(liczba_probek);
 
@@ -283,14 +342,15 @@ void dft_test3(double czest1, double czest2, double czest3, int a, double filtr)
 
 }
 
-void dft_test5(double czest1, double czest2, double czest3, int a, int ft)
+void dft_test5(int a, int ft, double amplituda1, double czestotliwosc1, double przesuniecie_faz1, double amplituda2, double czestotliwosc2, double przesuniecie_faz2, double amplituda3, double czestotliwosc3,
+    double przesuniecie_faz3)
 {
     int liczba_probek = 10 * a;
     int zakres = a;
 
     vector<double> x = mp::linspace(0, 2 * PI, liczba_probek);
 
-    vector<double> zlozenie = mp::transform(x, [&](auto t) { return sin(czest1 * t) + sin(czest2 * t) + sin(czest3 * t); });
+    vector<double> zlozenie = generator(amplituda1, czestotliwosc1, przesuniecie_faz1, amplituda2, czestotliwosc2, przesuniecie_faz2, amplituda3, czestotliwosc3, przesuniecie_faz3, liczba_probek);
 
     vector<complex<double>> spektrum(liczba_probek);
 
@@ -302,10 +362,10 @@ void dft_test5(double czest1, double czest2, double czest3, int a, int ft)
 
     zlozenie2 = rdft_vector(spektrum);
 
-    rys(x, zlozenie2, "dft");
+    rys(x, zlozenie2, "rdft");
 
 }
-/////////////////////////////////////////////////////TESTY
+
 PYBIND11_MODULE(projekt, m) {
 
 	m.def("signal", &gen_sig);
