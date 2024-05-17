@@ -15,7 +15,7 @@ namespace py = pybind11;
 namespace mp = matplot;
 
 // zdefiniowanie liczby PI
-#define PI 3.14159265
+#define PI 3.14159265358979323846
 
 //DEKLARACJE FUNKCJI
 
@@ -27,7 +27,7 @@ void low_f_filter_im(vector<complex<double>>&, int);
 vector<complex<double>> dft_vector(vector<double>);
 vector<double> amplitude(vector<complex<double>>, int);
 vector<double> frequency(vector<complex<double>>, int);
-vector<double> rdft_vector(vector<complex<double>>);
+
 vector<double> generator(double, double, double, double, double, double, double, double, double, int);
 void dft_test1(double, double, double, double, double, double, double, double, double, int);
 void dft_test3(int, double, double, double, double, double, double, double, double, double, double);
@@ -190,19 +190,22 @@ void low_f_filter_real(vector<double>& amplituda, const vector<double>& czestotl
     }
 }
 
-void low_f_filter_im(vector<complex<double>>& spectrum, int filtracja) 
+void low_f_filter_im(vector<complex<double>>& spectrum, int filtracja)
 {
     int k = spectrum.size();
 
-    for (int i = 0; i <= filtracja; ++i)
-    {
-        spectrum[i] = 0.0;
-    }
+        
+        for (int i = 0; i <= filtracja; ++i) 
+        {
+            spectrum[i] = 0.0;
+        }
 
-    for (int i = k; i >= k - filtracja; --i)
-    {
-        spectrum[i] = 0.0;
-    }
+        
+        for (int i = k - 1; i >= k - filtracja; --i) 
+        {
+            spectrum[i] = 0.0;
+        }
+    
 }
 
 
@@ -255,11 +258,9 @@ vector<double> frequency(vector<complex<double>> spektrum, int podzialka)
     return czestotliwosc;
 }
 
-vector<double> rdft_vector(const vector<complex<double>> spektrum)
+void rdft_vector(const vector<complex<double>>& spektrum, vector<double>& zlozenie)
 {
-    int dlugosc = spektrum.size();
-
-    vector<double> zlozenie2(dlugosc);
+    int dlugosc = zlozenie.size();
 
     for (int m = 0; m < dlugosc; ++m)
     {
@@ -269,11 +270,10 @@ vector<double> rdft_vector(const vector<complex<double>> spektrum)
             double kat = 2 * PI * m * n / dlugosc;
             suma += spektrum[n] * polar(1.0, kat);
         }
-        zlozenie2[m] = suma.real() / dlugosc;
+        zlozenie[m] = suma.real() / dlugosc;
     }
-
-    return zlozenie2;
 }
+
 
 void dft_test1(double amplituda1, double czestotliwosc1, double przesuniecie_faz1, double amplituda2, double czestotliwosc2, double przesuniecie_faz2, double amplituda3, double czestotliwosc3,
     double przesuniecie_faz3, int liczba_probek)
@@ -354,15 +354,40 @@ void dft_test5(int a, int ft, double amplituda1, double czestotliwosc1, double p
 
     vector<complex<double>> spektrum(liczba_probek);
 
+    vector<double> zlozenie2(liczba_probek);
+
     spektrum = dft_vector(zlozenie);
 
     low_f_filter_im(spektrum, ft);
 
-    vector<double> zlozenie2(liczba_probek);
-
-    zlozenie2 = rdft_vector(spektrum);
+    rdft_vector(spektrum, zlozenie2);
 
     rys(x, zlozenie2, "rdft");
+
+}
+
+void dft_test6(int a, int ft, double amplituda1, double czestotliwosc1, double przesuniecie_faz1, double amplituda2, double czestotliwosc2, double przesuniecie_faz2, double amplituda3, double czestotliwosc3,
+    double przesuniecie_faz3)
+{
+    int liczba_probek = 10 * a;
+    int zakres = a;
+
+    vector<double> x = mp::linspace(0, 2 * PI, liczba_probek);
+
+    vector<double> zlozenie = generator(amplituda1, czestotliwosc1, przesuniecie_faz1, amplituda2, czestotliwosc2, przesuniecie_faz2, amplituda3, czestotliwosc3, przesuniecie_faz3, liczba_probek);
+
+    vector<complex<double>> spektrum(liczba_probek);
+
+    vector<double> zlozenie2(liczba_probek);
+
+    spektrum = dft_vector(zlozenie);
+
+    rdft_vector(spektrum, zlozenie2);
+
+    for (int i = 0; i < liczba_probek; ++i)
+    {
+        cout << zlozenie2[i] << endl;
+    }
 
 }
 
@@ -379,4 +404,5 @@ PYBIND11_MODULE(projekt, m) {
     m.def("splot_test", &dft_test1);
     m.def("dft_test", &dft_test3);
     m.def("rdft_test", &dft_test5);
+    m.def("dzialaj", &dft_test6);
 }
