@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <complex>
+#include <AudioFile.h>
 
 //domyślny namespace
 using namespace std;
@@ -15,7 +16,8 @@ namespace py = pybind11;
 namespace mp = matplot;
 
 // zdefiniowanie liczby PI
-#define PI 3.14159265358979323846
+
+const double PI = acos(-1.0);
 
 //DEKLARACJE FUNKCJI
 
@@ -32,9 +34,6 @@ vector<double> generator(double, double, double, double, double, double, double,
 void dft_test1(double, double, double, double, double, double, double, double, double, int);
 void dft_test3(int, double, double, double, double, double, double, double, double, double, double);
 void dft_test5(int, int, double, double, double, double, double, double, double, double, double);
-
-
-
 
 vector<double> gen_sig(int rodzaj_funkcji, double amplituda, double czestotliwosc, double przesuniecie_faz, double ruch_y, int liczba_probek, double dlugosc)
 {
@@ -176,6 +175,7 @@ void test_gen_sig(int rodzaj_funkcji, double amplituda, double czestotliwosc, do
     }
 
     rys(x, y, name);
+
 }
 
 void low_f_filter_real(vector<double>& amplituda, const vector<double>& czestotliwosc, double filter)
@@ -189,6 +189,7 @@ void low_f_filter_real(vector<double>& amplituda, const vector<double>& czestotl
         ++i;
     }
 }
+
 
 void low_f_filter_im(vector<complex<double>>& spectrum, int filtracja)
 {
@@ -206,9 +207,8 @@ void low_f_filter_im(vector<complex<double>>& spectrum, int filtracja)
             spectrum[i] = 0.0;
         }
     
+
 }
-
-
 
 
 vector<complex<double>> dft_vector(vector<double> zlozenie)
@@ -274,9 +274,9 @@ void rdft_vector(const vector<complex<double>>& spektrum, vector<double>& zlozen
     }
 }
 
-
 void dft_test1(double amplituda1, double czestotliwosc1, double przesuniecie_faz1, double amplituda2, double czestotliwosc2, double przesuniecie_faz2, double amplituda3, double czestotliwosc3,
     double przesuniecie_faz3, int liczba_probek)
+
 {
 
     vector<double> x = mp::linspace(0, 2 * PI, liczba_probek);
@@ -298,6 +298,7 @@ void dft_test1(double amplituda1, double czestotliwosc1, double przesuniecie_faz
 vector<double> generator(double amplituda1, double czestotliwosc1, double przesuniecie_faz1, double amplituda2, double czestotliwosc2, double przesuniecie_faz2, double amplituda3, double czestotliwosc3,
     double przesuniecie_faz3, int liczba_probek)
 {
+
     vector<double> x = mp::linspace(0, 2 * PI, liczba_probek);
 
     vector<double> y1 = mp::transform(x, [&](auto x) { return (amplituda1 * sin(czestotliwosc1 * x - przesuniecie_faz1 * PI)); });
@@ -344,6 +345,7 @@ void dft_test3(int a, double filtr, double amplituda1, double czestotliwosc1, do
 
 void dft_test5(int a, int ft, double amplituda1, double czestotliwosc1, double przesuniecie_faz1, double amplituda2, double czestotliwosc2, double przesuniecie_faz2, double amplituda3, double czestotliwosc3,
     double przesuniecie_faz3)
+
 {
     int liczba_probek = 10 * a;
     int zakres = a;
@@ -405,4 +407,5 @@ PYBIND11_MODULE(projekt, m) {
     m.def("dft_test", &dft_test3);
     m.def("rdft_test", &dft_test5);
     m.def("dzialaj", &dft_test6);
+
 }
