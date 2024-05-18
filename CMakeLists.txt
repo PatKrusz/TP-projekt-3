@@ -23,11 +23,4 @@ if(Matplot++_FOUND)
     target_link_libraries(projekt PUBLIC Matplot++::matplot)
 endif()
 
-add_subdirectory(lib/audiofile)
-
-add_definitions (-DPROJECT_BINARY_DIR="${CMAKE_CURRENT_BINARY_DIR}")
-file (COPY test-audio.wav DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-target_link_libraries(projekt PUBLIC AudioFile)
-
 install(TARGETS projekt LIBRARY DESTINATION .)
