@@ -15,8 +15,7 @@ namespace py = pybind11;
 namespace mp = matplot;
 
 // zdefiniowanie liczby PI
-#define PI 3.14159265358979323846
-
+const double PI = acos(-1.0);
 
 vector<double> gen_sig(int rodzaj_funkcji, double amplituda, double czestotliwosc, double przesuniecie_faz, double ruch_y, int liczba_probek, double dlugosc)
 {
