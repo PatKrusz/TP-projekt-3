@@ -4,6 +4,3 @@
 [submodule "lib/matplotplusplus"]
 	path = lib/matplotplusplus
 	url = https://github.com/alandefreitas/matplotplusplus.git
-[submodule "lib/audiofile"]
-	path = lib/audiofile
-	url = https://github.com/adamstark/AudioFile.git
